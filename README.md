@@ -17,6 +17,26 @@ Professional-grade contactless forehead scanning with live thermal imaging, guid
 
 </div>
 
+## Origin
+
+ThermoLink is the full Android successor to the original **Wireless IR Temperature Scanner** — a project that started on Instructables and Hackster.io. The original used a simple serial-over-Bluetooth link to a desktop app. ThermoLink rebuilds that idea from the ground up: native Android, Wi-Fi TCP, 10 sensors, thermal imaging, face detection, and a live web dashboard — while keeping the same ESP8266 hardware most builders already have.
+
+| | Original | ThermoLink |
+|---|---|---|
+| Platform | Desktop (serial monitor) | Android app |
+| Connection | Bluetooth serial | Wi-Fi TCP · Bluetooth |
+| Sensors | MLX90614 | 10 sensors incl. thermal arrays |
+| Output | Serial text | Live screen · web dashboard · XLSX export |
+| Face guidance | — | ML Kit on-device detection |
+
+**Original project:**
+
+- 📄 [Arduino sketch](https://github.com/engrpanda/Wireless-IR-Temperature-Scanner/blob/master/Wireless_IR_Temperature_Scanner.ino)
+- 🔧 [Instructables tutorial](https://www.instructables.com/id/Wireless-IR-Temperature-Scanner/)
+- 🔧 [Hackster.io tutorial](https://www.hackster.io/engrpandaece/wireless-ir-temperature-scanner-acbfd9)
+
+---
+
 ## What It Does
 
 ThermoLink turns an Android phone into a contactless temperature screening station. It connects to an ESP8266 or ESP32 microcontroller over **Wi-Fi (TCP)** or **Bluetooth**, reads temperature data from your IR sensor, and guides the subject through the scan with on-screen and voice instructions.
@@ -215,6 +235,8 @@ All processing is on-device. No data leaves your network. Face detection runs en
 
 <div align="center">
 
-Built with ❤️ by [engrpanda](https://github.com/engrpanda) · Originally from [Instructables: Wireless IR Temperature Scanner](https://www.instructables.com)
+Built with ❤️ by [engrpanda](https://github.com/engrpanda)
+
+Successor to [Wireless IR Temperature Scanner](https://github.com/engrpanda/Wireless-IR-Temperature-Scanner) · [Instructables](https://www.instructables.com/id/Wireless-IR-Temperature-Scanner/) · [Hackster.io](https://www.hackster.io/engrpandaece/wireless-ir-temperature-scanner-acbfd9)
 
 </div>

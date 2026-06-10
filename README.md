@@ -11,7 +11,7 @@
 
 Professional-grade contactless forehead scanning with live thermal imaging, guided face detection, a real-time web dashboard, and scan history export. Built for kiosk deployments, clinics, and any high-throughput screening environment.
 
-[**Download APK**](#) · [**ESP Sketch**](#getting-started) · [**Web Dashboard**](#web-dashboard)
+[**⬇ Download APK**](https://github.com/engrpanda/Thermo_Link/releases) · [**ESP Sketch**](#esp-sketches) · [**Web Dashboard**](#web-dashboard)
 
 ---
 
@@ -93,8 +93,8 @@ You can tap them in any order. **Save Scan** dims until at least one of the two 
 | **Panasonic Grid-EYE** | Thermal array | 8 × 8 | Live heatmap |
 | **MLX90640** | Thermal camera | 32 × 24 | High-res heatmap |
 | **MLX90621** | Thermal array | 16 × 4 | Wide-angle |
-| **Omron D6T-44L** | Thermal array | 4 × 4 | UART |
-| **Omron D6T-8L** | Thermal array | 1 × 8 | UART |
+| **Omron D6T-44L** | Thermal array | 4 × 4 | Raw I²C |
+| **Omron D6T-8L** | Thermal array | 1 × 8 | Raw I²C |
 
 Array sensors render a **live iron-palette heatmap** on the scan screen and web dashboard in real time.
 
@@ -102,32 +102,7 @@ Array sensors render a **live iron-palette heatmap** on the scan screen and web 
 
 ## Getting Started
 
-### 1 · Flash the ESP
-
-1. Open `esp_sketch.ino` (bundled inside the app under **Settings → ESP Sketch**) in Arduino IDE
-2. Set your Wi-Fi credentials at the top:
-   ```cpp
-   const char* WIFI_SSID = "your_network";
-   const char* WIFI_PASS = "your_password";
-   ```
-3. Uncomment the block for **your sensor** (one block only — all others stay commented)
-4. Select your board:
-   - ESP8266 → **NodeMCU 1.0** or **Wemos D1 Mini**
-   - ESP32 → **ESP32 Dev Module** (swap `<ESP8266WiFi.h>` → `<WiFi.h>`)
-5. Flash and open Serial Monitor at **115200 baud** — note the IP address printed on boot
-
-**Required Arduino libraries** (install via Library Manager):
-
-| Library | Used for |
-|---|---|
-| Adafruit MLX90614 | MLX90614, MLX90615, MLX90632 |
-| Adafruit AMG88xx | AMG8833, Grid-EYE |
-| Adafruit MLX90640 | MLX90640 |
-| Adafruit TMP007 | TMP007 |
-
----
-
-### 2 · Connect the App
+### 1 · Connect the App
 
 **Wi-Fi (recommended)**
 1. On the Scan screen, tap **Wi-Fi ESP**
@@ -144,7 +119,7 @@ The app auto-reconnects to the last used device on launch.
 
 ---
 
-### 3 · Scan
+### 2 · Scan
 
 1. Tap **▶ Start Scan**
 2. Step in front of the camera — the app finds your face automatically
@@ -154,6 +129,450 @@ The app auto-reconnects to the last used device on launch.
 If auto-capture doesn't trigger, use the manual buttons: tap **📸 Take Photo**, then **🌡 Capture Temp**, then **Save Scan**.
 
 > **Tips:** Scan indoors. Avoid hair, hats, sweat, and direct sunlight. Use a consistent distance every time for best accuracy.
+
+---
+
+## ESP Sketches
+
+Each sensor has its own ready-to-flash sketch below. Open in Arduino IDE, set your Wi-Fi credentials, select your board, and flash.
+
+**Board selection:**
+- ESP8266 → `Tools → Board → NodeMCU 1.0` or `Wemos D1 Mini`
+- ESP32 → `Tools → Board → ESP32 Dev Module` — and replace `#include <ESP8266WiFi.h>` with `#include <WiFi.h>`
+
+**I²C wiring (all I²C sensors):**
+```
+ESP8266: SDA = D2 (GPIO4)  ·  SCL = D1 (GPIO5)
+ESP32:   SDA = GPIO21      ·  SCL = GPIO22
+```
+
+---
+
+### MLX90614
+
+**Library:** `Adafruit MLX90614 Library` (Arduino Library Manager)
+
+```cpp
+#include <ESP8266WiFi.h>   // use <WiFi.h> for ESP32
+#include <Wire.h>
+#include <Adafruit_MLX90614.h>
+
+const char* WIFI_SSID = "YOUR_WIFI_NAME";
+const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
+const int   TCP_PORT  = 8888;
+
+Adafruit_MLX90614 mlx;
+WiFiServer server(TCP_PORT);
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+  if (!mlx.begin()) { Serial.println("MLX90614 not found!"); while(1); }
+  Serial.println("MLX90614 ready");
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
+  Serial.println("\nIP: " + WiFi.localIP().toString());
+  server.begin();
+}
+
+void loop() {
+  WiFiClient client = server.available();
+  if (!client) return;
+  while (client.connected()) {
+    float t = mlx.readObjectTempC();
+    client.println("T:" + String(t, 2));
+    delay(500);
+  }
+  client.stop();
+}
+```
+
+---
+
+### MLX90615
+
+**Library:** `Adafruit MLX90614 Library` (same library as MLX90614)
+
+```cpp
+#include <ESP8266WiFi.h>   // use <WiFi.h> for ESP32
+#include <Wire.h>
+#include <Adafruit_MLX90614.h>
+
+const char* WIFI_SSID = "YOUR_WIFI_NAME";
+const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
+const int   TCP_PORT  = 8888;
+
+Adafruit_MLX90614 mlx;
+WiFiServer server(TCP_PORT);
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+  if (!mlx.begin()) { Serial.println("MLX90615 not found!"); while(1); }
+  Serial.println("MLX90615 ready");
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
+  Serial.println("\nIP: " + WiFi.localIP().toString());
+  server.begin();
+}
+
+void loop() {
+  WiFiClient client = server.available();
+  if (!client) return;
+  while (client.connected()) {
+    float t = mlx.readObjectTempC();
+    client.println("T:" + String(t, 2));
+    delay(500);
+  }
+  client.stop();
+}
+```
+
+---
+
+### MLX90632
+
+**Library:** `Adafruit MLX90614 Library` (compatible)
+
+```cpp
+#include <ESP8266WiFi.h>   // use <WiFi.h> for ESP32
+#include <Wire.h>
+#include <Adafruit_MLX90614.h>
+
+const char* WIFI_SSID = "YOUR_WIFI_NAME";
+const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
+const int   TCP_PORT  = 8888;
+
+Adafruit_MLX90614 mlx;
+WiFiServer server(TCP_PORT);
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+  if (!mlx.begin()) { Serial.println("MLX90632 not found!"); while(1); }
+  Serial.println("MLX90632 ready");
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
+  Serial.println("\nIP: " + WiFi.localIP().toString());
+  server.begin();
+}
+
+void loop() {
+  WiFiClient client = server.available();
+  if (!client) return;
+  while (client.connected()) {
+    float t = mlx.readObjectTempC();
+    client.println("T:" + String(t, 2));
+    delay(500);
+  }
+  client.stop();
+}
+```
+
+---
+
+### TMP007
+
+**Library:** `Adafruit TMP007 Library` (Arduino Library Manager)
+
+```cpp
+#include <ESP8266WiFi.h>   // use <WiFi.h> for ESP32
+#include <Wire.h>
+#include <Adafruit_TMP007.h>
+
+const char* WIFI_SSID = "YOUR_WIFI_NAME";
+const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
+const int   TCP_PORT  = 8888;
+
+Adafruit_TMP007 tmp;
+WiFiServer server(TCP_PORT);
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+  if (!tmp.begin()) { Serial.println("TMP007 not found!"); while(1); }
+  Serial.println("TMP007 ready");
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
+  Serial.println("\nIP: " + WiFi.localIP().toString());
+  server.begin();
+}
+
+void loop() {
+  WiFiClient client = server.available();
+  if (!client) return;
+  while (client.connected()) {
+    float t = tmp.readObjTempC();
+    client.println("T:" + String(t, 2));
+    delay(500);
+  }
+  client.stop();
+}
+```
+
+---
+
+### AMG8833 / Panasonic Grid-EYE
+
+**Library:** `Adafruit AMG88xx Library` (Arduino Library Manager)
+
+```cpp
+#include <ESP8266WiFi.h>   // use <WiFi.h> for ESP32
+#include <Wire.h>
+#include <Adafruit_AMG88xx.h>
+
+const char* WIFI_SSID = "YOUR_WIFI_NAME";
+const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
+const int   TCP_PORT  = 8888;
+
+Adafruit_AMG88xx amg;
+WiFiServer server(TCP_PORT);
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+  if (!amg.begin()) { Serial.println("AMG8833 not found!"); while(1); }
+  Serial.println("AMG8833 (8x8) ready");
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
+  Serial.println("\nIP: " + WiFi.localIP().toString());
+  server.begin();
+}
+
+void loop() {
+  WiFiClient client = server.available();
+  if (!client) return;
+  while (client.connected()) {
+    float pixels[64];
+    amg.readPixels(pixels);
+    String frame = "GRID:";
+    for (int i = 0; i < 64; i++) {
+      frame += String(pixels[i], 1);
+      if (i < 63) frame += ",";
+    }
+    client.println(frame);
+    delay(500);
+  }
+  client.stop();
+}
+```
+
+---
+
+### MLX90640
+
+**Library:** `Adafruit MLX90640 Library` (Arduino Library Manager)
+
+```cpp
+#include <ESP8266WiFi.h>   // use <WiFi.h> for ESP32
+#include <Wire.h>
+#include <Adafruit_MLX90640.h>
+
+const char* WIFI_SSID = "YOUR_WIFI_NAME";
+const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
+const int   TCP_PORT  = 8888;
+
+Adafruit_MLX90640 mlx640;
+WiFiServer server(TCP_PORT);
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+  if (!mlx640.begin(MLX90640_I2CADDR_DEFAULT, &Wire)) {
+    Serial.println("MLX90640 not found!"); while(1);
+  }
+  mlx640.setMode(MLX90640_CHESS);
+  mlx640.setResolution(MLX90640_ADC_18BIT);
+  mlx640.setRefreshRate(MLX90640_8_HZ);
+  Serial.println("MLX90640 (32x24) ready");
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
+  Serial.println("\nIP: " + WiFi.localIP().toString());
+  server.begin();
+}
+
+void loop() {
+  WiFiClient client = server.available();
+  if (!client) return;
+  while (client.connected()) {
+    float frame[768];
+    if (mlx640.getFrame(frame) == 0) {
+      String out = "MLX640:";
+      for (int i = 0; i < 768; i++) {
+        out += String(frame[i], 1);
+        if (i < 767) out += ",";
+      }
+      client.println(out);
+    }
+    delay(250);
+  }
+  client.stop();
+}
+```
+
+---
+
+### MLX90621
+
+**Library:** [MLX90621 Arduino Library](https://github.com/longjos/MLX90621_Arduino_Library) — install manually from GitHub
+
+```cpp
+#include <ESP8266WiFi.h>   // use <WiFi.h> for ESP32
+#include <Wire.h>
+#include <MLX90621.h>
+
+const char* WIFI_SSID = "YOUR_WIFI_NAME";
+const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
+const int   TCP_PORT  = 8888;
+
+MLX90621 mlx621;
+WiFiServer server(TCP_PORT);
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+  mlx621.initialise(4);   // 4 Hz refresh rate
+  Serial.println("MLX90621 (4x16) ready");
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
+  Serial.println("\nIP: " + WiFi.localIP().toString());
+  server.begin();
+}
+
+void loop() {
+  WiFiClient client = server.available();
+  if (!client) return;
+  while (client.connected()) {
+    mlx621.measure(true);
+    String frame = "MLX621:";
+    for (int i = 0; i < 64; i++) {
+      frame += String(mlx621.getTemperature(i), 1);
+      if (i < 63) frame += ",";
+    }
+    client.println(frame);
+    delay(500);
+  }
+  client.stop();
+}
+```
+
+---
+
+### Omron D6T-44L
+
+**Library:** None — uses raw I²C. **Wiring:** SDA/SCL same as other I²C sensors.
+
+```cpp
+#include <ESP8266WiFi.h>   // use <WiFi.h> for ESP32
+#include <Wire.h>
+
+const char* WIFI_SSID = "YOUR_WIFI_NAME";
+const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
+const int   TCP_PORT  = 8888;
+
+#define D6T_ADDR 0x0A
+WiFiServer server(TCP_PORT);
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+  Serial.println("D6T-44L ready");
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
+  Serial.println("\nIP: " + WiFi.localIP().toString());
+  server.begin();
+}
+
+void loop() {
+  WiFiClient client = server.available();
+  if (!client) return;
+  while (client.connected()) {
+    Wire.requestFrom(D6T_ADDR, 35);
+    float pixels[16];
+    int idx = 0;
+    Wire.read(); Wire.read();  // skip PTAT bytes
+    for (int i = 0; i < 16 && Wire.available() >= 2; i++) {
+      int lo = Wire.read(), hi = Wire.read();
+      pixels[idx++] = ((hi << 8) | lo) / 10.0f;
+    }
+    String frame = "D6T44:";
+    for (int i = 0; i < 16; i++) {
+      frame += String(pixels[i], 1);
+      if (i < 15) frame += ",";
+    }
+    client.println(frame);
+    delay(500);
+  }
+  client.stop();
+}
+```
+
+---
+
+### Omron D6T-8L
+
+**Library:** None — uses raw I²C. **Wiring:** SDA/SCL same as other I²C sensors.
+
+```cpp
+#include <ESP8266WiFi.h>   // use <WiFi.h> for ESP32
+#include <Wire.h>
+
+const char* WIFI_SSID = "YOUR_WIFI_NAME";
+const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
+const int   TCP_PORT  = 8888;
+
+#define D6T_ADDR 0x0A
+WiFiServer server(TCP_PORT);
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+  Serial.println("D6T-8L ready");
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
+  Serial.println("\nIP: " + WiFi.localIP().toString());
+  server.begin();
+}
+
+void loop() {
+  WiFiClient client = server.available();
+  if (!client) return;
+  while (client.connected()) {
+    Wire.requestFrom(D6T_ADDR, 19);
+    float pixels[8];
+    int idx = 0;
+    Wire.read(); Wire.read();  // skip PTAT bytes
+    for (int i = 0; i < 8 && Wire.available() >= 2; i++) {
+      int lo = Wire.read(), hi = Wire.read();
+      pixels[idx++] = ((hi << 8) | lo) / 10.0f;
+    }
+    String frame = "D6T8:";
+    for (int i = 0; i < 8; i++) {
+      frame += String(pixels[i], 1);
+      if (i < 7) frame += ",";
+    }
+    client.println(frame);
+    delay(500);
+  }
+  client.stop();
+}
+```
+
+---
+
+## Sensor Wiring (I²C)
+
+```
+ESP8266          Sensor
+─────────        ──────
+3.3V      →      VCC
+GND       →      GND
+D2 (SDA)  →      SDA
+D1 (SCL)  →      SCL
+```
+
+For ESP32: use GPIO 21 (SDA) and GPIO 22 (SCL).
+D6T sensors use I²C at 3.3V — no additional wiring needed beyond SDA/SCL.
 
 ---
 
@@ -214,22 +633,6 @@ Every scan is saved locally with:
 | Scan delay | Minimum milliseconds between scans |
 | Weather | Room temperature and heat index overlay |
 | Clock | Live clock on scan screen |
-
----
-
-## Sensor Wiring (I²C — all single-point and most array sensors)
-
-```
-ESP8266          Sensor
-─────────        ──────
-3.3V      →      VCC
-GND       →      GND
-D2 (SDA)  →      SDA
-D1 (SCL)  →      SCL
-```
-
-For ESP32: use GPIO 21 (SDA) and GPIO 22 (SCL).  
-D6T sensors use UART — see comments in the sketch for pin mapping.
 
 ---
 

@@ -67,6 +67,20 @@ While idle, the screen shows scanning tips. The moment a face is detected, the t
 
 ---
 
+## Manual Capture
+
+If auto-capture stalls or you prefer full control, three buttons are always available at the bottom of the scan screen:
+
+| Button | What it does |
+|---|---|
+| 📸 **Take Photo** | Snaps a photo and caches it. Shows **📸 Photo ✅** when ready. Nothing is saved yet. |
+| 🌡 **Capture Temp** | Caches the current temperature reading. Shows **🌡 Temp ✅** when ready. Nothing is saved yet. |
+| 💾 **Save Scan** | Commits everything — cached photo + temperature — to the database and web dashboard in one shot. |
+
+You can tap them in any order. **Save Scan** dims until at least one of the two is staged, then brightens to signal it's ready to commit. Both labels reset after a successful save.
+
+---
+
 ## Supported Sensors
 
 | Sensor | Type | Resolution | Notes |
@@ -135,7 +149,9 @@ The app auto-reconnects to the last used device on launch.
 1. Tap **▶ Start Scan**
 2. Step in front of the camera — the app finds your face automatically
 3. Hold the sensor **3–5 cm from the forehead**, above the eyebrows
-4. Tap **Done** — the temperature is captured and saved
+4. Tap **Done** — temperature is captured and saved automatically
+
+If auto-capture doesn't trigger, use the manual buttons: tap **📸 Take Photo**, then **🌡 Capture Temp**, then **Save Scan**.
 
 > **Tips:** Scan indoors. Avoid hair, hats, sweat, and direct sunlight. Use a consistent distance every time for best accuracy.
 

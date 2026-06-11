@@ -1,15 +1,24 @@
 <div align="center">
+      
+# 🌡 ThermoLink
+
+**Wireless IR temperature scanning for Android — powered by ESP8266 / ESP32**
+Professional-grade contactless forehead scanning with live thermal imaging, guided face detection, a real-time web dashboard, and scan history export. Built for kiosk deployments, clinics, and any high-throughput screening environment.
+
+<div align="center">
+
+<img src="https://github.com/engrpanda/Thermo_Link/blob/main/asset/asset.png?raw=true" />
+
+</div>
+
+<div align="center">
 
 <img src="https://img.shields.io/badge/Platform-Android%206.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white"/>
 <img src="https://img.shields.io/badge/Connection-WiFi%20%7C%20Bluetooth-00BCD4?style=for-the-badge&logo=bluetooth&logoColor=white"/>
 <img src="https://img.shields.io/badge/Sensors-10%20Supported-FF6F00?style=for-the-badge&logo=arduino&logoColor=white"/>
 <img src="https://img.shields.io/badge/License-MIT-9C27B0?style=for-the-badge"/>
 
-# 🌡 ThermoLink
 
-**Wireless IR temperature scanning for Android — powered by ESP8266 / ESP32**
-
-Professional-grade contactless forehead scanning with live thermal imaging, guided face detection, a real-time web dashboard, and scan history export. Built for kiosk deployments, clinics, and any high-throughput screening environment.
 
 [**⬇ Download APK**](https://github.com/engrpanda/Thermo_Link/releases) · [**ESP Sketch**](#esp-sketches) · [**Web Dashboard**](#web-dashboard)
 
